@@ -1,0 +1,103 @@
+/* Custom dropdown styles -- global helpers for native <select> and custom dropdown UIs */
+
+/* Generic reset for native selects to allow custom styling */
+
+/* Add a custom arrow as an inline SVG so there's no external asset */
+select.custom-dropdown,
+.custom-select select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 20 20' fill='none'><path d='M5 7l5 5 5-5' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 12px;
+}
+
+/* Focus state */
+select:focus,
+.custom-select select:focus {
+  outline: none;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
+}
+
+/* Disabled state */
+select:disabled,
+.custom-select select:disabled {
+  background-color: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Helper wrapper for custom dropdown components (JS-driven panels) */
+.custom-select {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.custom-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid black;
+}
+
+.custom-select__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 20px rgba(16,24,40,0.06);
+  z-index: 60;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.custom-select__option {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #111827;
+  cursor: pointer;
+}
+
+.custom-select__option:hover {
+  background: rgb(255, 224, 224);
+}
+
+.custom-select__option--selected {
+  background: #f8a9a9;
+  font-weight: 600;
+  color:"white"
+}
+
+/* If you want stronger control over option visuals across browsers, use the .custom-select markup and .custom-select__option elements (JS-driven). */
+
+/* Small / compact utility */
+.custom-dropdown--sm select,
+.custom-select--sm .custom-select__trigger {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* Large utility */
+.custom-dropdown--lg select,
+.custom-select--lg .custom-select__trigger {
+  padding: 10px 14px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+/* Ensure select reuse in forms doesn't overflow */
+select, .custom-select { max-width: 100%; }
+
+/* Small helper: remove native arrow in older browsers if needed */
+select::-ms-expand { display: none; }
+
+/* End of dropdown styles */
