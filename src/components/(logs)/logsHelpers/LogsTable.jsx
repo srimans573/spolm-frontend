@@ -1,6 +1,21 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import example from "./mock/mock";
+import {
+  BotIcon,
+  Calendar1Icon,
+  ChartBarIncreasing,
+  CircleCheckIcon,
+  Clock10Icon,
+  FlagIcon,
+  List,
+  PersonStandingIcon,
+  RocketIcon,
+  TabletIcon,
+  UserCheck,
+  UserRoundPen,
+  WavesLadder,
+} from "lucide-react";
 
 /**
  * TracesTable Component
@@ -20,8 +35,6 @@ import example from "./mock/mock";
  * }
  */
 export default function LogsTable({ traces = [] }) {
-
-  
   const navigate = useNavigate();
   const tableStyle = {
     width: "100%",
@@ -38,6 +51,7 @@ export default function LogsTable({ traces = [] }) {
     padding: "10px",
     fontSize: "12px",
     color: "gray",
+    justifyContent: "center",
   };
 
   const cellStyle = {
@@ -65,23 +79,64 @@ export default function LogsTable({ traces = [] }) {
     <table style={tableStyle}>
       <thead>
         <tr>
-          <th style={headerStyle}>Agent</th>
-          <th style={headerStyle}>Status</th>
-          <th style={headerStyle}>Request</th>
-          <th style={headerStyle}>Response</th>
-          <th style={headerStyle}>Step Count</th>
-          <th style={headerStyle}>Latency</th>
-          <th style={headerStyle}>Created At</th>
+          <th style={headerStyle}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <BotIcon size={14} />
+              <p>Agent</p>
+            </div>
+          </th>
+          <th style={headerStyle}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <CircleCheckIcon size={14} />
+              <p>Status</p>
+            </div>
+          </th>
+          <th style={headerStyle}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <UserRoundPen size={14} />
+              <p>Task</p>
+            </div>
+          </th>
+          <th style={headerStyle}>
+            {" "}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <FlagIcon size={14} />
+              <p>Result</p>
+            </div>
+          </th>
+          <th style={headerStyle}>
+            {" "}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <ChartBarIncreasing size={14} />
+              <p>Steps</p>
+            </div>
+          </th>
+          <th style={headerStyle}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Clock10Icon size={14} />
+              <p>Duration</p>
+            </div>
+          </th>
+          <th style={headerStyle}>
+            {" "}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Calendar1Icon size={14} />
+              <p>Created At</p>
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody>
         {traces.map((t, idx) => (
           <tr
-              key={idx}
-              onClick={() => navigate(`/logs/${t.run_id}`, { state: { run: t } })}
-              style={{ cursor: "pointer", background: idx % 2 == 1 ? "whitesmoke" : "transparent" }}
-              title={`Open logs for ${t.run_id}`}
-            >
+            key={idx}
+            onClick={() => navigate(`/logs/${t.run_id}`, { state: { run: t } })}
+            style={{
+              cursor: "pointer",
+              background: idx % 2 == 1 ? "whitesmoke" : "transparent",
+            }}
+            title={`Open logs for ${t.run_id}`}
+          >
             <td style={cellStyle}>
               <div>
                 <p>{t.agent_id}</p>
@@ -113,7 +168,7 @@ export default function LogsTable({ traces = [] }) {
             </td>
             <td style={cellStyle}>{t.user_task.slice(0, 25) + "..."}</td>
             <td style={cellStyle}>{t.final_output.slice(0, 25) + "..."}</td>
-            <td style={cellStyle}>{t.steps.length}</td>
+            <td style={cellStyle}>{JSON.parse(t.steps).length}</td>
             <td style={cellStyle}>
               {(t.duration / 1000).toPrecision(3) + " sec"}
             </td>

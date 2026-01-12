@@ -4,7 +4,7 @@ export default function ModalShifter({subOptions, setSubOptionMode, subOptionMod
       {subOptions.map((t, idx) => (
         <div
           style={{
-            padding: "0px 16px",
+            padding: "0px 61px",
             borderRight: "1px solid gainsboro",
             width: "fit-content",
             textAlign: "center",

@@ -6,8 +6,9 @@ import StepDetails from "../logsViewerHelpers/StepDetails";
 import WaterfallTimelineView from "../logsViewerHelpers/WaterfallTimeline";
 
 export default function LogsComponent({run}) {
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(1);
   const [view, setView] = useState("waterfall");
+  const parsedSteps = JSON.parse(run.steps);
 
   // resizable left column state (px)
   const [leftWidth, setLeftWidth] = useState(420);
@@ -49,19 +50,19 @@ export default function LogsComponent({run}) {
 
   const totalMs = useMemo(() => {
     if (run?.duration) return run.duration;
-    return (run?.steps || []).reduce(
+    return (parsedSteps || []).reduce(
       (a, b) => a + (Number(b.step_latency || 0) || 0),
       0
     );
   }, [run]);
 
   useEffect(() => {
-    if (run?.steps?.length) {
+    if (parsedSteps.length) {
       setSelected(run.steps[0].step_id);
     }
   }, [run]);
 
-  const selectedStep = run?.steps?.find((s) => s.step_id === selected);
+  const selectedStep = parsedSteps.find((s) => s.step_id === selected);
 
   return (
     <div
@@ -147,14 +148,14 @@ export default function LogsComponent({run}) {
         <div style={{ flex: 1, overflowY: "auto" }}>
           {view === "waterfall" ? (
             <WaterfallTimelineView
-              steps={run.steps || []}
+              steps={parsedSteps || []}
               totalMs={totalMs}
               onStepClick={setSelected}
               selectedId={selected}
             />
           ) : (
             <StepsView
-              steps={run.steps || []}
+              steps={parsedSteps || []}
               onStepClick={setSelected}
               selectedId={selected}
             />

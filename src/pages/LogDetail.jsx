@@ -12,10 +12,12 @@ import {
   LayoutDashboardIcon,
   ListCheckIcon,
   LogsIcon,
+  SquareActivityIcon,
 } from "lucide-react";
 import ModalShifter from "../components/helper/ModalShifter";
 import LogsComponent from "../components/(logs)/logsComponent/LogsComponent";
 import { useLocation, useParams } from "react-router-dom";
+import LogsOverview from "../components/(logs)/logsHelpers/LogsOverview";
 
 // Helper: try to find a run in localStorage org caches by run id
 function findRunInLocalCaches(runId) {
@@ -44,19 +46,11 @@ export default function LogDetail({ user }) {
   const subOptions = [
     {
       name: "Overview",
-      icon: <LayoutDashboardIcon size={15} />,
+      icon: <SquareActivityIcon size={15} />,
     },
     {
-      name: "Logs",
+      name: "Trace",
       icon: <LogsIcon size={15} />,
-    },
-    {
-      name: "Issues",
-      icon: <FileWarningIcon size={15} />,
-    },
-    {
-      name: "Statistics",
-      icon: <ChartBar size={15} />,
     },
     {
       name: "Rubric Evals",
@@ -94,8 +88,21 @@ export default function LogDetail({ user }) {
         }}
       >
         {/* HEADER AREA (AUTO HEIGHT) */}
-        <div style={{ padding: 18, paddingBottom: "0px", fontFamily:"Poppins" }}>
-          <Breadcrumb items={["Personal", "Logs", run?.run_id || runIdParam || "(not found)"]} />
+        <div
+          style={{
+            padding: "8px 18px",
+            borderBottom: "1px solid gainsboro",
+            position: "sticky",
+            width: "100%",
+          }}
+        >
+          <Breadcrumb
+            items={[
+              "Personal",
+              "Logs",
+              run?.run_id || runIdParam || "(not found)",
+            ]}
+          />
         </div>
 
         <div style={{}}>
@@ -105,10 +112,10 @@ export default function LogDetail({ user }) {
             <div style={{ padding: 24 }}>
               <h3>Log not available</h3>
               <p>
-                The selected log wasn't passed to this page and couldn't be found
-                in local cache. If you navigated directly to this URL, try
-                opening the log from the Logs page so the app can pass the
-                data, or refresh after opening Logs so the cache is populated.
+                The selected log wasn't passed to this page and couldn't be
+                found in local cache. If you navigated directly to this URL, try
+                opening the log from the Logs page so the app can pass the data,
+                or refresh after opening Logs so the cache is populated.
               </p>
             </div>
           )}
@@ -121,7 +128,8 @@ export default function LogDetail({ user }) {
           setSubOptionMode={setSubOptionMode}
           subOptionMode={subOptionMode}
         />
-        {subOptionMode == "Logs" && <LogsComponent run={run} />}
+        {subOptionMode == "Overview" && <LogsOverview run={run} />}
+        {subOptionMode == "Trace" && <LogsComponent run={run} />}
       </div>
     </div>
   );

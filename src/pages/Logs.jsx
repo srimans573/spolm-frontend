@@ -116,50 +116,33 @@ function Logs({ user }) {
       }}
     >
       <Sidebar user={user} />
-      <div style={{width:"100%"}}>
+      <div style={{ width: "100%" }}>
         <div
           style={{
             padding: "8px 18px",
             borderBottom: "1px solid gainsboro",
             position: "sticky",
             width: "100%",
+            marginBottom:"18px"
           }}
         >
           <Breadcrumb items={["Per", "Logs"]} />
           {/* Header */}
         </div>{" "}
-        <div style={{ width: "100%", padding:18 }}>
-          <LogsHeader />
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-evenly",
-              width: "100%",
-            }}
-          >
+        <div style={{ width: "100%" }}>
+          <div style={{ padding: "0px 18px" }}>
+            <LogsHeader />
+          </div>
+         
             <div
               style={{
-                width: "85%",
+                width:"100%",
                 height: "540px",
+                boxSizing:"border-box",
+                padding:"0px 18px"
               }}
             >
               <LogsTable traces={allLogData} loading={loading} />
-            </div>
-            <div
-              style={{
-                width: "15%",
-                borderLeft: "1px solid black",
-                height: "540px",
-              }}
-            >
-              <LogsStats
-                sections={{
-                  Stats: {
-                    "Total Traces": Array.isArray(logs) ? logs.length : 0,
-                  },
-                }}
-              />
-            </div>
           </div>
         </div>
       </div>

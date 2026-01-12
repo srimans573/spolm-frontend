@@ -35,7 +35,7 @@ const LogsHeader = () => {
               fontWeight: "700",
             }}
           >
-            Logs
+            Traces
           </h2>
           <p
             style={{
@@ -43,7 +43,7 @@ const LogsHeader = () => {
               alignItems: "center",
             }}
           >
-            View your development & production logs here
+            View your development & production traces here
           </p>
         </div>
         <div

@@ -19,6 +19,7 @@ import ProtectedRoute from "./pages/Protected";
 import Logs from "./pages/Logs";
 import LogDetail from "./pages/LogDetail";
 import Dashboard from "./pages/Dashboard";
+import { SidebarProvider } from "./context/SidebarContext";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -116,14 +117,15 @@ function App() {
           fontFamily: "Libre Baskerville, serif",
         }}
       >
-        <p>Loading...</p>
+        
       </div>
     );
   }
 
   return (
-    <Router>
-      <Routes>
+    <SidebarProvider>
+      <Router>
+        <Routes>
         <Route path="/auth" element={<Auth />} />
         <Route
           path="/settings"
@@ -207,8 +209,9 @@ function App() {
             </ProtectedRoute>
           }
         />
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </SidebarProvider>
   );
 }
 

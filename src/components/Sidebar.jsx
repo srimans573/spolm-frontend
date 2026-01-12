@@ -1,4 +1,5 @@
 import {
+  ActivityIcon,
   BotIcon,
   BrainCircuitIcon,
   BrainCogIcon,
@@ -9,19 +10,22 @@ import {
   LogsIcon,
   Settings2Icon,
   SettingsIcon,
+  TrendingUpDown,
 } from "lucide-react";
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { useSidebar } from "../context/SidebarContext";
 
 function Sidebar({
   organization = { name: "Spolm Org", initials: "SP" },
   user = null,
-  collapsed = false,
 }) {
+  const { collapsed } = useSidebar();
   const navItems = [
     { label: "Dashboard", to: "/dashboard", icon: <HomeIcon size={15} /> },
     { label: "Agents", to: "/agents", icon: <BrainIcon size={15} /> },
-    { label: "Logs", to: "/logs", icon: <LogsIcon size={15} /> },
+    { label: "Traces", to: "/logs", icon: <LogsIcon size={15} /> },
+    { label: "Patterns", to: "/patterns", icon: <TrendingUpDown size={15} /> },
     { label: "Settings", to: "/settings", icon: <SettingsIcon size={15} /> },
   ];
 
@@ -43,10 +47,10 @@ function Sidebar({
   return (
     <aside
       style={{
-        minWidth: collapsed ? 64 : 250,
-        width: collapsed ? 64 : 250,
+        minWidth: collapsed ? 64 : 240,
+        width: collapsed ? 40 : 240,
         borderRight: "1px solid #e5e7eb",
-        padding: collapsed ? "12px 8px" : "20px",
+        padding: collapsed ? "12px 8px" : "10px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -66,20 +70,20 @@ function Sidebar({
             gap: 12,
             marginBottom: collapsed ? 8 : 18,
             paddingBottom: collapsed ? 6 : "10px",
-            justifyContent: collapsed ? "center" : "flex-start",
+            justifyContent: "flex-start",
           }}
         >
           <div>
             <p
               style={{
                 margin: "0px",
-                fontSize: collapsed ? 14 : 20,
+                fontSize: collapsed ? 12 : 20,
                 fontWeight: 600,
                 fontFamily: "Libre Baskerville",
                 padding: "5px",
               }}
             >
-              {collapsed ? organization.initials || "SP" : "spolm"}
+              {"spolm"}
             </p>
           </div>
         </div>
@@ -89,9 +93,10 @@ function Sidebar({
           <div
             style={{
               padding: 0,
-              marginRight: 20,
+              marginRight: !collapsed && 20,
               display: "flex",
               flexDirection: "column",
+              justifyContent:"center",
               gap: 6,
             }}
           >
@@ -135,6 +140,7 @@ function Sidebar({
             fontSize: "14px",
             paddingLeft: collapsed ? 0 : "10px",
             cursor: "pointer",
+            justifyContent:collapsed&&"center"
           }}
         >
           <LogOutIcon size={15} />
@@ -148,11 +154,12 @@ function Sidebar({
             borderTop: collapsed ? "none" : "1px solid #e5e7eb",
             paddingTop: collapsed ? 8 : 20,
             width: "100%",
+            justifyContent:"center"
           }}
         >
           <div
             style={{
-              width: collapsed ? 36 : 40,
+              width: collapsed ? "80%" : 40,
               height: collapsed ? 36 : 40,
               background: "coral",
               display: "flex",
@@ -160,9 +167,10 @@ function Sidebar({
               justifyContent: "center",
               fontWeight: 600,
               color: "#0f172a",
-              border: "1px solid #e5e7eb",
+              border: "1px solid black",
               fontSize: collapsed ? 16 : 30,
               borderRadius: "1px",
+              fontFamily: "Libre Baskerville",
             }}
           >
             {user && user.uid

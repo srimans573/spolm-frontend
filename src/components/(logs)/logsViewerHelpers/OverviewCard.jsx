@@ -5,9 +5,10 @@ export default function OverviewCard({ run }) {
         display: "flex",
         gap: 24,
         alignItems: "flex-start",
-        padding: "14px 18px",
+        padding: "8px 18px",
         background: "#ffffff",
         marginBottom: 1,
+        alignItems:"center"
       }}
     >
       <div style={{ flex: 1 }}>
@@ -95,7 +96,7 @@ export default function OverviewCard({ run }) {
             STEPS
           </div>
           <div style={{ fontWeight: 700, fontSize: 18, color: "#111827" }}>
-            {run.steps?.length ?? 0}
+            {JSON.parse(run.steps)?.length ?? 0}
           </div>
         </div>
         <div style={{ textAlign: "center", minWidth: 70 }}>
