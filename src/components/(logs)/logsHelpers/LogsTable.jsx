@@ -17,23 +17,6 @@ import {
   WavesLadder,
 } from "lucide-react";
 
-/**
- * TracesTable Component
- * - Renders traces in a full table similar to Helicone's style
- * - Inline CSS only, no Tailwind
- *
- * Expected trace object shape:
- * {
- *   createdAt: "November 12 10:16 AM",
- *   status: "Success",
- *   request: "You are an expert t...",
- *   response: "Great choice! Cost...",
- *   model: "gpt-3.5-turbo-0125",
- *   totalTokens: 339,
- *   promptTokens: 234,
- *   completionTokens: 105,
- * }
- */
 export default function LogsTable({ traces = [] }) {
   const navigate = useNavigate();
   const tableStyle = {
@@ -127,54 +110,92 @@ export default function LogsTable({ traces = [] }) {
         </tr>
       </thead>
       <tbody>
-        {traces.map((t, idx) => (
-          <tr
-            key={idx}
-            onClick={() => navigate(`/logs/${t.run_id}`, { state: { run: t } })}
-            style={{
-              cursor: "pointer",
-              background: idx % 2 == 1 ? "whitesmoke" : "transparent",
-            }}
-            title={`Open logs for ${t.run_id}`}
-          >
-            <td style={cellStyle}>
-              <div>
-                <p>{t.agent_id}</p>
-                <p style={{ fontSize: "8px" }}>
-                  {t.run_id.slice(0, 18) + "..."}
-                </p>
-              </div>
-            </td>
-            <td style={cellStyle}>
-              <p
+        {traces &&
+          traces.map((t, idx) => {
+            const logData = t.logData
+              ? typeof t.logData === "string"
+                ? JSON.parse(t.logData)
+                : t.logData
+              : null;
+            const analysis = t.analysis
+              ? typeof t.analysis === "string"
+                ? JSON.parse(t.analysis)
+                : t.analysis
+              : null;
+            if (!logData) return null;
+            return (
+              <tr
+                key={idx}
+                onClick={() =>
+                  navigate(`/logs/${logData.run_id}`, {
+                    state: { run: logData, analysis: analysis },
+                  })
+                }
                 style={{
-                  backgroundColor:
-                    t.status == "complete" ? "#98FB98" : "#FA8072",
-                  color: t.status == "complete" ? "#008000" : "#DC143C",
-                  outline:
-                    t.status == "complete"
-                      ? "1px solid #008000"
-                      : "1px solid #DC143C",
                   cursor: "pointer",
-                  fontWeight: "600",
-                  width: "50px",
-                  textAlign: "center",
-                  padding: "4px 8px",
-                  fontSize: "10px",
+                  background: idx % 2 === 1 ? "whitesmoke" : "transparent",
                 }}
+                title={`Open logs for ${logData.run_id || "unknown"}`}
               >
-                {t.status}
-              </p>
-            </td>
-            <td style={cellStyle}>{t.user_task.slice(0, 25) + "..."}</td>
-            <td style={cellStyle}>{t.final_output.slice(0, 25) + "..."}</td>
-            <td style={cellStyle}>{JSON.parse(t.steps).length}</td>
-            <td style={cellStyle}>
-              {(t.duration / 1000).toPrecision(3) + " sec"}
-            </td>
-            <td style={cellStyle}>{t.start_timestamp}</td>
-          </tr>
-        ))}
+                <td style={cellStyle}>
+                  <div>
+                    <p>{t.agent_id}</p>
+                    <p style={{ fontSize: "8px" }}>
+                      {logData.run_id
+                        ? logData.run_id.slice(0, 18) + "..."
+                        : "N/A"}
+                    </p>
+                  </div>
+                </td>
+                <td style={cellStyle}>
+                  <p
+                    style={{
+                      backgroundColor:
+                        logData.status === "complete" ? "#98FB98" : "#FA8072",
+                      color:
+                        logData.status === "complete" ? "#008000" : "#DC143C",
+                      outline:
+                        logData.status === "complete"
+                          ? "1px solid #008000"
+                          : "1px solid #DC143C",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                      width: "50px",
+                      textAlign: "center",
+                      padding: "4px 8px",
+                      fontSize: "10px",
+                    }}
+                  >
+                    {logData.status || "unknown"}
+                  </p>
+                </td>
+                <td style={cellStyle}>
+                  {logData.user_task
+                    ? logData.user_task.slice(0, 25) + "..."
+                    : "N/A"}
+                </td>
+                <td style={cellStyle}>
+                  {logData.final_output
+                    ? logData.final_output.slice(0, 25) + "..."
+                    : "N/A"}
+                </td>
+                <td style={cellStyle}>
+                  {logData.steps
+                    ? (typeof logData.steps === "string"
+                        ? JSON.parse(logData.steps)
+                        : logData.steps
+                      ).length
+                    : 0}
+                </td>
+                <td style={cellStyle}>
+                  {logData.duration
+                    ? (logData.duration / 1000).toPrecision(3) + " sec"
+                    : "N/A"}
+                </td>
+                <td style={cellStyle}>{logData.start_timestamp || "N/A"}</td>
+              </tr>
+            );
+          })}
       </tbody>
     </table>
   );

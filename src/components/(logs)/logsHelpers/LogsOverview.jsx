@@ -25,7 +25,8 @@ import {
   Boxes,
   DollarSignIcon,
 } from "lucide-react";
-
+import AnalysisView from "../logsViewerHelpers/AnalysisView";
+import mockAnalysis from "./mock/mockAnalysis";
 ChartJS.register(
   ArcElement,
   Tooltip,
@@ -51,7 +52,7 @@ const colors = {
   light: "#9ca3af",
   border: "#e5e5e5",
   bg: "#fafafa",
-  accent: "#10b981", // Single accent color
+  accent: "#10b981",
   accentLight: "#d1fae5",
   danger: "#dc2626",
   dangerLight: "#fee2e2",
@@ -67,31 +68,6 @@ const fmt = (ms) =>
     ? `${Math.round(ms)}ms`
     : `${(ms / 1000).toFixed(2)}s`;
 
-// Token pricing (per 1M tokens) - adjust based on your LLM provider
-const TOKEN_PRICING = {
-  gemini: { input: 0.075, output: 0.30 },
-  openai: { input: 0.50, output: 1.50 },
-  anthropic: { input: 3.00, output: 15.00 },
-  default: { input: 0.10, output: 0.30 },
-};
-
-function calculateCost(steps = []) {
-  // Guard against non-array input
-  if (!steps || !Array.isArray(steps)) return 0;
-  
-  let totalCost = 0;
-  steps.forEach((step) => {
-    if (step.tokens) {
-      const provider = step.tool_provider?.toLowerCase() || "default";
-      const pricing = TOKEN_PRICING[provider] || TOKEN_PRICING.default;
-      const inputCost = (step.tokens.promptTokenCount || 0) * (pricing.input / 1_000_000);
-      const outputCost = (step.tokens.candidatesTokenCount || 0) * (pricing.output / 1_000_000);
-      totalCost += inputCost + outputCost;
-    }
-  });
-  return totalCost;
-}
-
 function analyze(steps = [], duration = 0, userTask = "", finalOutput = "") {
   // Guard against non-array input
   if (!steps || !Array.isArray(steps) || !steps.length) return null;
@@ -100,13 +76,6 @@ function analyze(steps = [], duration = 0, userTask = "", finalOutput = "") {
   const latencies = steps.map((s) => s.step_latency || 0).sort((a, b) => a - b);
   const p50 = latencies[Math.floor(latencies.length * 0.5)];
   const p95 = latencies[Math.floor(latencies.length * 0.95)];
-
-  // Calculate token usage from steps
-  const tokenTotals = getTokenTotals(steps);
-  const totalTokens = tokenTotals.totalTokens;
-  const inputTokens = tokenTotals.inputTokens;
-  const outputTokens = tokenTotals.outputTokens;
-  const estimatedCost = calculateCost(steps);
 
   let fastest = steps[0],
     slowest = steps[0];
@@ -166,13 +135,6 @@ function analyze(steps = [], duration = 0, userTask = "", finalOutput = "") {
     });
   }
 
-  if (duration > 5000) {
-    recommendations.push({
-      text: "Duration exceeds 5s — optimize critical path",
-      priority: "medium",
-    });
-  }
-
   // Build step durations for line chart
   const stepDurations = steps.map((s, i) => ({
     label: s.step_name.length > 8 ? s.step_name.slice(0, 8) + "…" : s.step_name,
@@ -201,18 +163,13 @@ function analyze(steps = [], duration = 0, userTask = "", finalOutput = "") {
     userTask,
     finalOutput,
     stepDurations,
-    // Token data
-    totalTokens,
-    inputTokens,
-    outputTokens,
-    estimatedCost,
   };
 }
 
 // ─────────────────────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────────────────────
-export default function LogsOverview({ run }) {
+export default function LogsOverview({ run, analysis }) {
   // Parse steps if it's a JSON string, otherwise use as-is
   const parsedSteps = useMemo(() => {
     if (!run?.steps) return [];
@@ -485,7 +442,7 @@ export default function LogsOverview({ run }) {
                   marginTop: 4,
                 }}
               >
-                {stats.totalTokens.toLocaleString()}
+                {run.tokenUsage.total_tokens}
               </div>
               <div
                 style={{
@@ -494,7 +451,7 @@ export default function LogsOverview({ run }) {
                   marginTop: 2,
                 }}
               >
-                {stats.inputTokens.toLocaleString()} in · {stats.outputTokens.toLocaleString()} out
+                {run.tokenUsage.input_tokens} in · {run.tokenUsage.output_tokens} out
               </div>
             </div>
             <div style={{ height: "50%", padding: "12px 0px 0px 12px" }}>
@@ -520,7 +477,7 @@ export default function LogsOverview({ run }) {
                   marginTop: 4,
                 }}
               >
-                ${stats.estimatedCost < 0.01 ? stats.estimatedCost.toFixed(4) : stats.estimatedCost.toFixed(2)}
+                ${run.tokenUsage.total_cost < 0.01 ? run.tokenUsage.total_cost.toFixed(4): run.tokenUsage.total_cost.toFixed(2)}
               </div>
             </div>
           </div>
@@ -714,244 +671,7 @@ export default function LogsOverview({ run }) {
           </div>
         </div>
       </div>
-
-      {/* Row 3: Breakdown + Analysis + Recommendations — fills remaining space */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "220px 1fr 260px",
-          flex: 1,
-          minHeight: 0,
-        }}
-      >
-        {/* Provider Breakdown */}
-
-        {/* Analysis */}
-        <div
-          style={{
-            padding: "16px 18px",
-            borderRight: `1px solid ${colors.border}`,
-            overflow: "auto",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 10,
-              color: colors.muted,
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              marginBottom: 12,
-            }}
-          >
-            Analysis
-          </div>
-          {stats.insights.length === 0 ? (
-            <div style={{ color: colors.light, fontSize: 12 }}>
-              No issues detected
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {stats.insights.map((insight, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 10,
-                    padding: "10px 12px",
-                    background:
-                      insight.type === "error" ? colors.dangerLight : colors.bg,
-                    borderLeft: `3px solid ${
-                      insight.type === "error"
-                        ? colors.danger
-                        : insight.type === "success"
-                        ? colors.accent
-                        : colors.muted
-                    }`,
-                  }}
-                >
-                  {insight.type === "error" ? (
-                    <AlertTriangle
-                      size={14}
-                      color={colors.danger}
-                      style={{ flexShrink: 0, marginTop: 1 }}
-                    />
-                  ) : (
-                    <CheckCircle2
-                      size={14}
-                      color={colors.accent}
-                      style={{ flexShrink: 0, marginTop: 1 }}
-                    />
-                  )}
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 500 }}>
-                      {insight.text}
-                    </div>
-                    {insight.detail && (
-                      <div
-                        style={{
-                          fontSize: 11,
-                          color: colors.muted,
-                          marginTop: 3,
-                        }}
-                      >
-                        {insight.detail}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Recommendations */}
-        <div style={{ padding: "16px 18px", overflow: "auto" }}>
-          <div
-            style={{
-              fontSize: 10,
-              color: colors.muted,
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              marginBottom: 12,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Lightbulb size={12} /> Recommendations
-          </div>
-          {stats.recommendations.length === 0 ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
-                background: colors.accentLight,
-                borderLeft: `3px solid ${colors.accent}`,
-              }}
-            >
-              <CheckCircle2 size={14} color={colors.accent} />
-              <span style={{ fontSize: 12 }}>No optimizations needed</span>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {stats.recommendations.map((rec, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 10,
-                    padding: "10px 12px",
-                    background: colors.bg,
-                  }}
-                >
-                  <TrendingUp
-                    size={12}
-                    color={colors.muted}
-                    style={{ marginTop: 2, flexShrink: 0 }}
-                  />
-                  <div>
-                    <div style={{ fontSize: 12 }}>{rec.text}</div>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        padding: "2px 6px",
-                        background:
-                          rec.priority === "high"
-                            ? colors.dangerLight
-                            : colors.border,
-                        color:
-                          rec.priority === "high"
-                            ? colors.danger
-                            : colors.muted,
-                        marginTop: 4,
-                        display: "inline-block",
-                      }}
-                    >
-                      {rec.priority}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+       <AnalysisView analysis={analysis.execution_timeline ? analysis : ""} />
       </div>
-    </div>
   );
 }
-
-// ─────────────────────────────────────────────────────────────
-// Example Data
-// ─────────────────────────────────────────────────────────────
-const exampleRun = {
-  run_id: "e28b300f-406c-45d1-998e-46d365e1dd14",
-  agent_id: "GmailReadAndReply",
-  user_task: "Read the latest email and reply with 'chicken' in it",
-  final_output: "Completed successfully — reply sent to srimans572@gmail.com",
-  duration: 7147,
-  status: "complete",
-  steps: [
-    {
-      step_id: "1",
-      step_name: "reasoning",
-      step_type: "llm_call",
-      step_latency: 756,
-      tool_provider: "gemini",
-      step_status: "failure",
-      step_error: { reasoning: "Agent not authenticated" },
-    },
-
-    {
-      step_id: "3",
-      step_name: "reasoning",
-      step_type: "llm_call",
-      step_latency: 563,
-      tool_provider: "gemini",
-      step_status: "success",
-    },
-    {
-      step_id: "7",
-      step_name: "reasoning",
-      step_type: "llm_call",
-      step_latency: 776,
-      tool_provider: "gemini",
-      step_status: "success",
-    },
-    {
-      step_id: "8",
-      step_name: "generateReply",
-      step_type: "llm_call",
-      step_latency: 1062,
-      tool_provider: "gemini",
-      step_status: "success",
-    },
-    {
-      step_id: "9",
-      step_name: "reasoning",
-      step_type: "llm_call",
-      step_latency: 927,
-      tool_provider: "gemini",
-      step_status: "success",
-    },
-    {
-      step_id: "10",
-      step_name: "sendReply",
-      step_type: "tool_call",
-      step_latency: 524,
-      tool_provider: "gmail",
-      step_status: "success",
-    },
-    {
-      step_id: "11",
-      step_name: "reasoning",
-      step_type: "llm_call",
-      step_latency: 664,
-      tool_provider: "gemini",
-      step_status: "success",
-    },
-  ],
-};

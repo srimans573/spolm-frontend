@@ -13,11 +13,13 @@ import {
   ListCheckIcon,
   LogsIcon,
   SquareActivityIcon,
+  BrainCircuit,
 } from "lucide-react";
 import ModalShifter from "../components/helper/ModalShifter";
 import LogsComponent from "../components/(logs)/logsComponent/LogsComponent";
-import { useLocation, useParams } from "react-router-dom";
+import { useAsyncError, useLocation, useParams } from "react-router-dom";
 import LogsOverview from "../components/(logs)/logsHelpers/LogsOverview";
+import mockAnalysis from "../components/(logs)/logsHelpers/mock/mockAnalysis";
 
 // Helper: try to find a run in localStorage org caches by run id
 function findRunInLocalCaches(runId) {
@@ -30,7 +32,10 @@ function findRunInLocalCaches(runId) {
       const parsed = JSON.parse(raw);
       const arr = parsed?.data || [];
       const found = arr.find((r) => r.id === runId || r.run_id === runId);
-      if (found) return found;
+      if (found) {
+        console.log(found)
+        return found;
+      }
     }
   } catch (e) {
     console.warn("findRunInLocalCaches error", e);
@@ -42,6 +47,7 @@ export default function LogDetail({ user }) {
   const { id: runIdParam } = useParams();
   const location = useLocation();
   const [run, setRun] = useState(location?.state?.run || null);
+  const [analysis, setAnalysis] = useState(location?.state?.analysis)
   const [subOptionMode, setSubOptionMode] = useState("Overview");
   const subOptions = [
     {
@@ -52,10 +58,6 @@ export default function LogDetail({ user }) {
       name: "Trace",
       icon: <LogsIcon size={15} />,
     },
-    {
-      name: "Rubric Evals",
-      icon: <ListCheckIcon size={15} />,
-    },
   ];
 
   useEffect(() => {
@@ -63,6 +65,7 @@ export default function LogDetail({ user }) {
     // try to locate run in local caches saved by Logs page
     if (runIdParam) {
       const found = findRunInLocalCaches(runIdParam);
+      console.log(found)
       if (found) setRun(found);
     }
   }, [run, runIdParam]);
@@ -128,7 +131,7 @@ export default function LogDetail({ user }) {
           setSubOptionMode={setSubOptionMode}
           subOptionMode={subOptionMode}
         />
-        {subOptionMode == "Overview" && <LogsOverview run={run} />}
+        {subOptionMode == "Overview" && <LogsOverview run={run} analysis={analysis} />}
         {subOptionMode == "Trace" && <LogsComponent run={run} />}
       </div>
     </div>

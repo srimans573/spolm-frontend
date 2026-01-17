@@ -15,7 +15,9 @@ function AgentList({ onSelect }) {
   useEffect(() => {
     const load = async () => {
       const user = auth.currentUser;
-      const orgId = JSON.parse(localStorage.getItem("spolm_user_"+user.uid)).orgId;
+      const orgId = JSON.parse(
+        localStorage.getItem("spolm_user_" + user.uid)
+      ).orgId;
       if (!user) return;
       try {
         const colRef = collection(db, "organizations", orgId, "agents");
@@ -82,7 +84,6 @@ function AgentList({ onSelect }) {
               options={[
                 { value: "createdAt", label: "Newest" },
                 { value: "name", label: "Name" },
-                { value: "language", label: "Language" },
               ]}
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value)}
@@ -137,32 +138,7 @@ function AgentList({ onSelect }) {
                 >
                   Description
                 </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: 10,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    background: "#fafafa",
-                    borderBottom: "1px solid #ddd",
-                    color: "#6b7280",
-                  }}
-                >
-                  Prompt
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: 10,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    background: "#fafafa",
-                    borderBottom: "1px solid #ddd",
-                    color: "#6b7280",
-                  }}
-                >
-                  Repo
-                </th>
+
                 <th
                   style={{
                     textAlign: "left",
@@ -243,31 +219,7 @@ function AgentList({ onSelect }) {
                     >
                       {a.description}
                     </td>
-                    <td
-                      style={{
-                        padding: 10,
-                        borderBottom: "1px solid #eee",
-                        maxWidth: 200,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        fontSize: "13px",
-                      }}
-                    >
-                      {a.instructions.slice(0, 30)}
-                    </td>
-                    <td
-                      style={{
-                        padding: 10,
-                        borderBottom: "1px solid #eee",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        fontSize: "13px",
-                      }}
-                    >
-                      {a.repo || "-"}
-                    </td>
+
                     <td style={{ padding: 10, borderBottom: "1px solid #eee" }}>
                       {createdAt}
                     </td>

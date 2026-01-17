@@ -23,9 +23,10 @@ function Sidebar({
   const { collapsed } = useSidebar();
   const navItems = [
     { label: "Dashboard", to: "/dashboard", icon: <HomeIcon size={15} /> },
-    { label: "Agents", to: "/agents", icon: <BrainIcon size={15} /> },
+    { label: "Learnings", to: "/learning", icon: <BrainIcon size={15} /> },
+
+    { label: "Agents", to: "/agents", icon: <BotIcon size={15} /> },
     { label: "Traces", to: "/logs", icon: <LogsIcon size={15} /> },
-    { label: "Patterns", to: "/patterns", icon: <TrendingUpDown size={15} /> },
     { label: "Settings", to: "/settings", icon: <SettingsIcon size={15} /> },
   ];
 
@@ -96,7 +97,7 @@ function Sidebar({
               marginRight: !collapsed && 20,
               display: "flex",
               flexDirection: "column",
-              justifyContent:"center",
+              justifyContent: "center",
               gap: 6,
             }}
           >
@@ -140,73 +141,12 @@ function Sidebar({
             fontSize: "14px",
             paddingLeft: collapsed ? 0 : "10px",
             cursor: "pointer",
-            justifyContent:collapsed&&"center"
+            justifyContent: collapsed && "center",
           }}
         >
           <LogOutIcon size={15} />
           {!collapsed && <span>Log Out</span>}
         </p>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            borderTop: collapsed ? "none" : "1px solid #e5e7eb",
-            paddingTop: collapsed ? 8 : 20,
-            width: "100%",
-            justifyContent:"center"
-          }}
-        >
-          <div
-            style={{
-              width: collapsed ? "80%" : 40,
-              height: collapsed ? 36 : 40,
-              background: "coral",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 600,
-              color: "#0f172a",
-              border: "1px solid black",
-              fontSize: collapsed ? 16 : 30,
-              borderRadius: "1px",
-              fontFamily: "Libre Baskerville",
-            }}
-          >
-            {user && user.uid
-              ? (
-                  (
-                    JSON.parse(
-                      localStorage.getItem("spolm_user_" + user.uid)
-                    ) || {}
-                  ).firstName || "U"
-                ).slice(0, 1)
-              : "U"}
-          </div>
-          {!collapsed && (
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>
-                {(user &&
-                  user.uid &&
-                  (
-                    JSON.parse(
-                      localStorage.getItem("spolm_user_" + user.uid)
-                    ) || {}
-                  ).firstName) ||
-                  "User"}
-              </div>
-              <div style={{ fontSize: 12, color: "#6b7280" }}>
-                {user &&
-                  user.uid &&
-                  (
-                    JSON.parse(
-                      localStorage.getItem("spolm_user_" + user.uid)
-                    ) || {}
-                  ).organization}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </aside>
   );

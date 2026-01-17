@@ -19,6 +19,7 @@ function Logs({ user }) {
   const [logs, setLogs] = useState([example2, example]);
   const [loading, setLoading] = useState(true);
   const [allLogData, setAllLogData] = useState([]);
+  const [servedServerSnapshot, setServedServerSnapshot] = useState(false);
 
   useEffect(() => {
     if (!user || !user.uid) {
@@ -40,8 +41,6 @@ function Logs({ user }) {
     }
 
     if (!orgId) {
-      // no orgId available yet; show mock data
-      setLogs([example2, example]);
       setLoading(false);
       return;
     }
@@ -56,7 +55,20 @@ function Logs({ user }) {
 
     const unsub = onSnapshot(
       q,
+      { includeMetadataChanges: true },
       (snapshot) => {
+        const isFromCache = !!snapshot.metadata?.fromCache;
+        const hasPendingWrites = !!snapshot.metadata?.hasPendingWrites;
+
+        // If persistence is enabled, Firestore may deliver a cached snapshot first.
+        // To avoid showing stale data that no longer exists on the server, ignore the
+        // initial cached snapshot when we are online and haven't served a server result yet.
+        if (isFromCache && typeof navigator !== "undefined" && navigator.onLine && !servedServerSnapshot) {
+          // keep loading until we receive a server-backed snapshot
+          setLoading(true);
+          return;
+        }
+
         const items = snapshot.docs.map((d) => {
           const data = d.data();
           // Normalize createdAt (support Firestore Timestamp)
@@ -64,10 +76,20 @@ function Logs({ user }) {
             data?.createdAt && typeof data.createdAt.toDate === "function"
               ? data.createdAt.toDate().toISOString()
               : data?.createdAt || null;
-          return { id: d.id, ...data, createdAt };
+
+          const agentId = data?.agentId;
+          return { id: d.id, ...data, createdAt, agentId };
         });
+        console.log(items)
         setLogs(items);
-        console.log(items);
+        // mark that we've served at least one non-cache snapshot
+        if (!isFromCache) setServedServerSnapshot(true);
+        console.log("Logs snapshot", {
+          count: items.length,
+          fromCache: isFromCache,
+          hasPendingWrites,
+          docIds: snapshot.docs.map((d) => d.id),
+        });
         setLoading(false);
 
         // Build an array containing every `logData` property from the fetched items.
@@ -142,7 +164,7 @@ function Logs({ user }) {
                 padding:"0px 18px"
               }}
             >
-              <LogsTable traces={allLogData} loading={loading} />
+              <LogsTable traces={logs} loading={loading} />
           </div>
         </div>
       </div>

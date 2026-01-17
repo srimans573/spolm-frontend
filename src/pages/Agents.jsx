@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import ProtectedRoute from "./Protected";
 import Sidebar from "../components/Sidebar";
 import AgentList from "../components/AgentList";
+import AgentCreateModal from "../components/AgentCreateModal";
 
 import { useNavigate } from "react-router-dom";
 import Breadcrumb from "../components/helper/Breadcrumb";
+import { Plus } from "lucide-react";
 
 function Agents({ user }) {
   const navigate = useNavigate();
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   return (
     <ProtectedRoute user={user}>
@@ -59,9 +62,22 @@ function Agents({ user }) {
               </div>
               <div>
                 <button
-                  onClick={() => navigate("/agents/create")}
-                  style={{ border: "1px solid black" }}
+                  onClick={() => setShowCreateModal(true)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 16px",
+                    border: "1px solid black",
+                    background: "#FF6B6B",
+                    color: "white",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontFamily: "Poppins, sans-serif",
+                  }}
                 >
+                  <Plus size={16} />
                   Create Agent
                 </button>
               </div>
@@ -72,7 +88,16 @@ function Agents({ user }) {
           </main>
         </div>
       </div>
-      {/* Create page is now a full route at /agents/create */}
+
+      {/* Create Agent Modal */}
+      <AgentCreateModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={(agent) => {
+          // Optionally navigate to the new agent or refresh list
+          navigate(`/agents/${agent.id}`);
+        }}
+      />
     </ProtectedRoute>
   );
 }

@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import CustomSelect from "./ui/CustomSelect";
+import CustomSelect from "../src/components/ui/CustomSelect";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-import FileViewer from "./agentViewer/FileViewer";
+import FileViewer from "../src/components/agentViewer/FileViewer";
 
 // --- Spolm-inspired Design Tokens ---
 const colors = {
